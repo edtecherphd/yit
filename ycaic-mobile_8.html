@@ -1,0 +1,1654 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>연암 AI Counselor — 전주기 학생 케어링</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" />
+<style>
+@font-face{
+  font-family:'Pretendard';
+  src:url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/woff2/PretendardVariable.woff2') format('woff2-variations');
+  font-weight:45 920;
+}
+
+:root{
+  --bg:#FFFFFF;
+  --panel:#F7F8FA;
+  --ink:#171923;
+  --ink-soft:#4A4F5C;
+  --muted:#8A8F9C;
+  --line:#ECEDF1;
+  --accent:#E14C6B;
+  --accent-soft:#FDEAEE;
+  --radius-md:14px;
+  --radius-sm:10px;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  font-family:'Pretendard', -apple-system, 'Apple SD Gothic Neo', system-ui, sans-serif;
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+  transition:background-color .2s, color .2s;
+}
+
+.screen{
+  max-width:430px;
+  margin:0 auto;
+  min-height:100vh;
+  background:var(--bg);
+  position:relative;
+  padding-bottom:90px;
+}
+
+/* ---------- Search bar ---------- */
+.searchbar-wrap{padding:16px 20px 0;}
+.searchbar{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:var(--bg);
+  border:1.5px solid var(--accent);
+  border-radius:999px;
+  padding:11px 16px;
+}
+.searchbar .plus{
+  color:var(--accent);
+  font-weight:700;
+  font-size:15px;
+}
+.searchbar input{
+  border:none;outline:none;background:none;
+  flex:1;font-size:14px;color:var(--muted);
+  font-family:inherit;
+}
+.bell-btn{
+  flex:none;
+  width:40px;height:40px;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:none;border:none;
+  color:var(--ink-soft);
+  position:relative;
+}
+.bell-btn .dot{
+  position:absolute;top:9px;right:10px;
+  width:6px;height:6px;border-radius:50%;
+  background:var(--accent);
+}
+.searchbar-row{display:flex;align-items:center;gap:6px;}
+
+/* ---------- Greeting header ---------- */
+.greeting{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  padding:22px 20px 0;
+}
+.mark{
+  flex:none;
+  width:34px;height:34px;
+  margin-top:2px;
+}
+.greeting-text h1{
+  margin:0;
+  font-size:19px;
+  font-weight:800;
+  letter-spacing:-.01em;
+}
+.greeting-sub{
+  margin-top:3px;
+  font-size:12.5px;
+  color:var(--muted);
+  font-weight:500;
+}
+.greeting-sub .plus-inline{color:var(--accent);font-weight:700;}
+
+.brief-box{
+  margin:14px 20px 0;
+  background:var(--panel);
+  border-radius:var(--radius-md);
+  padding:14px 16px;
+  font-size:13px;
+  line-height:1.55;
+  color:var(--ink-soft);
+}
+
+/* ---------- Task list ---------- */
+.tasklist{margin:18px 20px 0;}
+.task-row{
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
+  padding:11px 0;
+  border-bottom:1px solid var(--line);
+}
+.tasklist .task-row:last-child{border-bottom:none;}
+.task-time{
+  flex:none;
+  width:46px;
+  font-size:12.5px;
+  font-weight:700;
+  color:var(--ink);
+  padding-top:1px;
+}
+.task-body{flex:1;min-width:0;}
+.task-name{font-size:13.5px;font-weight:600;color:var(--ink);}
+.task-tag{
+  margin-top:3px;
+  font-size:11px;
+  color:var(--muted);
+  font-weight:500;
+}
+.task-action{
+  flex:none;
+  font-size:12.5px;
+  font-weight:700;
+  color:var(--accent);
+  background:none;
+  border:none;
+  padding:0;
+  align-self:center;
+  white-space:nowrap;
+}
+
+/* ---------- Section shell ---------- */
+.section{margin:30px 20px 0;}
+.section-head{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  margin-bottom:14px;
+}
+.section-title{font-size:16px;font-weight:800;letter-spacing:-.01em;}
+.section-note{font-size:12px;color:var(--muted);font-weight:600;}
+
+/* ---------- Timetable ---------- */
+.tt-card{width:100%;}
+.tt-header-row{
+  display:flex;
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+}
+.tt-label-spacer{flex:none;width:24px;}
+.tt-day{
+  flex:1;
+  height:26px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11.5px;font-weight:700;color:var(--ink-soft);
+  border-left:1px solid var(--line);
+}
+.tt-day.today{color:var(--accent);}
+.tt-body-row{display:flex;}
+.tt-hours{
+  flex:none;
+  width:24px;
+  height:336px;
+}
+.tt-hour{
+  height:42px;
+  font-size:9.5px;color:var(--muted);font-weight:600;
+  text-align:right;padding-right:4px;
+  box-sizing:border-box;
+  transform:translateY(-5px);
+}
+.tt-days-grid{
+  flex:1;
+  display:flex;
+  height:336px;
+  border-left:1px solid var(--line);
+}
+.tt-col{
+  flex:1;
+  position:relative;
+  border-right:1px solid var(--line);
+  background-image:linear-gradient(var(--line) 1px, transparent 1px);
+  background-size:100% 42px;
+  background-repeat:repeat-y;
+}
+.tt-course{
+  position:absolute;
+  left:2px;right:2px;
+  border-radius:6px;
+  padding:4px 5px;
+  font-size:10px;
+  font-weight:700;
+  line-height:1.22;
+  overflow:hidden;
+  word-break:keep-all;
+}
+.tt-course span{display:block;font-size:8.5px;font-weight:500;color:var(--ink-soft);margin-top:1px;}
+.c-blue{background:#E9F0FE;color:#2F6FED;}
+.c-green{background:#EAF7EE;color:#2F9E58;}
+.c-purple{background:#F1EDFE;color:#7C5CE0;}
+.c-pink{background:#FDECEF;color:#E14C6B;}
+.c-orange{background:#FDF1E4;color:#DB8B26;}
+.c-teal{background:#E4F6F4;color:#199C8C;}
+.c-yellow{background:#FBF4DE;color:#B4901A;}
+
+/* ---------- Upcoming ---------- */
+.up-row{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:12px 0;
+  border-bottom:1px solid var(--line);
+}
+.up-row:last-child{border-bottom:none;}
+.up-date{
+  flex:none;
+  width:44px;
+  text-align:left;
+}
+.up-date b{display:block;font-size:13.5px;font-weight:700;color:var(--ink);}
+.up-date small{font-size:10.5px;color:var(--muted);font-weight:600;}
+.up-body{flex:1;min-width:0;}
+.up-name{font-size:13.5px;font-weight:600;color:var(--ink);}
+.up-tag{margin-top:3px;font-size:11px;color:var(--muted);font-weight:500;}
+.dday{
+  flex:none;
+  font-size:11px;
+  font-weight:700;
+  color:var(--accent);
+  background:var(--accent-soft);
+  padding:3px 9px;
+  border-radius:999px;
+}
+
+/* ---------- View switching ---------- */
+.view{display:block;}
+.view.hidden{display:none;}
+
+/* ---------- Growth: profile ---------- */
+.profile-card{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:20px 20px 0;
+}
+.avatar{
+  flex:none;
+  width:52px;height:52px;
+  border-radius:50%;
+  background:var(--panel);
+  border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;font-weight:800;color:var(--ink);
+}
+.profile-name{font-size:18px;font-weight:800;letter-spacing:-.01em;}
+.profile-sub{margin-top:3px;font-size:12.5px;color:var(--muted);font-weight:500;}
+
+.chip-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  padding:14px 20px 0;
+}
+.tag-chip{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:11.5px;font-weight:600;
+  color:var(--ink-soft);
+  background:var(--panel);
+  border:1px solid var(--line);
+  padding:6px 10px;
+  border-radius:999px;
+  white-space:nowrap;
+}
+.tag-chip svg{width:11px;height:11px;flex:none;color:var(--muted);}
+.tag-chip.muted{color:var(--muted);}
+.tag-chip.link{color:var(--ink);font-weight:700;border-color:transparent;background:none;padding-left:4px;}
+
+.progress-section{padding:22px 20px 0;}
+.progress-labels{
+  display:flex;justify-content:space-between;
+  font-size:12px;font-weight:600;color:var(--muted);
+  margin-bottom:8px;
+}
+.progress-labels .end{color:var(--ink);font-weight:700;}
+.progress-track{
+  height:6px;border-radius:999px;
+  background:var(--panel);
+  overflow:hidden;
+}
+.progress-fill{
+  height:100%;
+  border-radius:999px;
+  background:var(--accent);
+}
+
+.stepper{
+  display:flex;
+  padding:22px 14px 0;
+}
+.step{
+  flex:1;
+  display:flex;flex-direction:column;align-items:center;
+  text-align:center;
+  gap:6px;
+}
+.step-dot{
+  width:26px;height:26px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11.5px;font-weight:800;
+  background:var(--panel);color:var(--muted);
+}
+.step.done .step-dot{background:var(--accent);color:#fff;}
+.step.current .step-dot{
+  background:#fff;color:var(--accent);
+  border:2px solid var(--accent);
+}
+.step-label{font-size:11px;font-weight:700;color:var(--ink);}
+.step.current .step-label{color:var(--accent);}
+.step-sub{font-size:9.5px;color:var(--muted);font-weight:500;}
+
+.level-badge{
+  font-size:11px;font-weight:800;
+  color:#fff;
+  background:var(--accent);
+  padding:4px 10px;
+  border-radius:999px;
+  white-space:nowrap;
+}
+
+.competency-card{
+  background:var(--panel);
+  border-radius:var(--radius-md);
+  padding:16px;
+}
+.comp-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:14px;
+}
+.comp-row:last-of-type{margin-bottom:12px;}
+.comp-label{
+  flex:none;width:58px;
+  font-size:12.5px;font-weight:700;color:var(--ink-soft);
+}
+.comp-bar{
+  flex:1;height:8px;border-radius:999px;
+  background:#EBEDF2;
+  overflow:hidden;
+}
+.comp-fill{height:100%;border-radius:999px;background:var(--accent);}
+.comp-value{flex:none;width:22px;text-align:right;font-size:12.5px;font-weight:700;color:var(--ink);}
+.comp-note{
+  font-size:11.5px;line-height:1.5;color:var(--muted);
+  border-top:1px solid var(--line);
+  padding-top:12px;
+  margin-top:2px;
+}
+
+.evidence-btn{
+  width:100%;
+  margin-top:12px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--bg);
+  border:1px solid var(--line);
+  border-radius:var(--radius-md);
+  padding:14px 16px;
+  font-size:13px;font-weight:700;color:var(--ink);
+  font-family:inherit;
+}
+.evidence-btn span{color:var(--muted);font-weight:700;}
+
+/* ---------- Chat ---------- */
+.chat-header{
+  display:none;
+  align-items:center;
+  justify-content:space-between;
+  padding:16px 16px 14px;
+  border-bottom:1px solid var(--line);
+}
+.chat-header.show{display:flex;}
+.chat-back{
+  background:none;border:none;color:var(--ink);
+  display:flex;align-items:center;justify-content:center;
+  width:28px;height:28px;padding:0;
+}
+.chat-title{font-size:16px;font-weight:800;letter-spacing:-.01em;}
+.chat-menu-btn{background:none;border:none;color:var(--ink);width:28px;height:28px;}
+
+.chat-intro-row{
+  display:flex;gap:10px;align-items:flex-start;
+  padding:18px 20px 0;
+}
+.chat-avatar{flex:none;width:28px;height:28px;margin-top:2px;}
+.chat-intro-bubble{
+  background:var(--panel);
+  border-radius:14px;
+  border-top-left-radius:4px;
+  padding:12px 14px;
+  font-size:13px;
+  line-height:1.55;
+  color:var(--ink);
+}
+
+.suggest-row{
+  display:flex;gap:8px;
+  padding:12px 20px 4px;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.suggest-row::-webkit-scrollbar{display:none;}
+.suggest-chip{
+  flex:none;
+  font-size:12px;font-weight:600;color:var(--ink-soft);
+  background:var(--bg);
+  border:1px solid var(--line);
+  padding:8px 12px;
+  border-radius:999px;
+  white-space:nowrap;
+  font-family:inherit;
+}
+.suggest-chip:active{background:var(--panel);}
+
+#chat-messages{padding:18px 0 90px;}
+.msg-row{display:flex;gap:8px;padding:0 20px;margin-bottom:14px;align-items:flex-start;}
+.msg-row.user{justify-content:flex-end;}
+.msg-row .msg-avatar{flex:none;width:28px;height:28px;margin-top:2px;}
+.msg-bubble{
+  max-width:76%;
+  padding:10px 13px;
+  border-radius:14px;
+  font-size:13px;
+  line-height:1.55;
+  white-space:pre-line;
+}
+.msg-row.assistant .msg-bubble{background:var(--panel);color:var(--ink);border-top-left-radius:4px;}
+.msg-row.user .msg-bubble{background:var(--accent);color:#fff;border-top-right-radius:4px;}
+
+.typing-bubble{
+  display:flex;gap:4px;align-items:center;
+  padding:12px 14px;
+}
+.typing-bubble span{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--muted);
+  animation:typing-bounce 1.2s infinite ease-in-out;
+}
+.typing-bubble span:nth-child(2){animation-delay:.15s;}
+.typing-bubble span:nth-child(3){animation-delay:.3s;}
+@keyframes typing-bounce{
+  0%,60%,100%{transform:translateY(0);opacity:.4;}
+  30%{transform:translateY(-4px);opacity:1;}
+}
+
+.chat-input-bar{
+  display:none;
+  position:fixed;
+  left:50%;
+  transform:translateX(-50%);
+  bottom:64px;
+  width:100%;
+  max-width:430px;
+  background:#fff;
+  border-top:1px solid var(--line);
+  padding:10px 14px;
+  align-items:center;
+  gap:8px;
+  z-index:60;
+}
+.chat-input-bar.show{display:flex;}
+.chat-input-bar input{
+  flex:1;
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:11px 16px;
+  font-size:13.5px;
+  font-family:inherit;
+  outline:none;
+  background:var(--panel);
+  color:var(--ink);
+}
+.chat-send-btn{
+  flex:none;width:38px;height:38px;border-radius:50%;
+  background:var(--accent);border:none;color:#fff;
+  display:flex;align-items:center;justify-content:center;
+}
+.chat-send-btn:disabled{background:var(--muted);}
+
+/* ---------- Portfolio ---------- */
+.port-sub{margin-top:6px;font-size:12.5px;color:var(--muted);line-height:1.5;}
+.ai-draft-btn{
+  width:100%;margin-top:16px;
+  background:var(--accent);color:#fff;
+  border:none;border-radius:12px;
+  padding:15px;font-size:14.5px;font-weight:800;
+  font-family:inherit;
+}
+.ai-draft-btn:active{opacity:.85;}
+.ai-draft-btn:disabled{opacity:.6;}
+
+.port-note-title{font-size:12.5px;font-weight:600;color:var(--ink-soft);max-width:70%;}
+.section-link-btn{background:none;border:none;font-size:12px;font-weight:700;color:var(--accent);font-family:inherit;padding:0;white-space:nowrap;}
+
+.stat-grid{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;
+  margin-top:14px;
+}
+.stat-card{
+  background:var(--bg);border:1px solid var(--line);border-radius:12px;
+  padding:12px 10px;text-align:left;font-family:inherit;
+}
+.stat-card b{display:block;font-size:17px;font-weight:800;color:var(--ink);}
+.stat-card span{display:block;margin-top:2px;font-size:11px;color:var(--muted);font-weight:600;}
+.stat-card:active{background:var(--panel);}
+
+.principle-box{
+  margin-top:14px;background:var(--panel);border-radius:var(--radius-md);
+  padding:14px 16px;
+}
+.principle-box b{font-size:12.5px;font-weight:800;color:var(--ink);}
+.principle-box p{margin:6px 0 0;font-size:11.5px;line-height:1.55;color:var(--muted);}
+
+#essay-list{margin-top:2px;}
+.essay-row{
+  width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:14px 0;border-bottom:1px solid var(--line);
+  border-left:none;border-right:none;border-top:none;
+  background:none;
+  text-align:left;font-family:inherit;
+}
+#essay-list .essay-row:last-child{border-bottom:none;}
+.essay-title{font-size:13.5px;font-weight:700;color:var(--ink);}
+.essay-meta{margin-top:3px;font-size:11px;color:var(--muted);font-weight:500;}
+.essay-badge{flex:none;font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:999px;white-space:nowrap;}
+.essay-badge.feedback{background:var(--accent-soft);color:var(--accent);}
+.essay-badge.draft{background:var(--panel);color:var(--muted);}
+
+.toast{
+  position:fixed;left:50%;bottom:96px;
+  transform:translate(-50%,10px);
+  max-width:360px;width:calc(100% - 60px);
+  background:var(--ink);color:#fff;
+  font-size:12.5px;font-weight:600;line-height:1.45;
+  padding:12px 16px;border-radius:12px;
+  opacity:0;pointer-events:none;
+  transition:opacity .25s, transform .25s;
+  text-align:center;
+  z-index:80;
+}
+.toast.show{opacity:1;transform:translate(-50%,0);}
+
+/* ---------- All-menu ---------- */
+.allmenu-profile{
+  display:flex;align-items:center;gap:14px;
+  padding:20px 20px 0;
+}
+.allmenu-profile .profile-name{font-size:17px;font-weight:800;}
+.allmenu-profile .profile-sub{margin-top:3px;font-size:12px;color:var(--muted);font-weight:500;}
+
+.menu-section{margin-top:26px;}
+.menu-section-label{font-size:12px;color:var(--muted);font-weight:700;margin:0 20px 8px;}
+.menu-card{
+  margin:0 20px;
+  background:var(--bg);
+  border:1px solid var(--line);
+  border-radius:var(--radius-md);
+  overflow:hidden;
+}
+.menu-row{
+  width:100%;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:15px 16px;
+  border-bottom:1px solid var(--line);
+  border-left:none;border-right:none;border-top:none;
+  background:none;
+  text-align:left;font-family:inherit;
+}
+.menu-card .menu-row:last-child{border-bottom:none;}
+.menu-row-label{font-size:13.5px;font-weight:600;color:var(--ink);}
+.menu-row-label.highlight-link{color:#2F6FED;font-weight:700;}
+.menu-row .chevron{flex:none;color:var(--muted);}
+.badge-soon{
+  flex:none;
+  font-size:11px;font-weight:600;color:var(--muted);
+  background:var(--panel);
+  padding:4px 10px;border-radius:999px;
+  white-space:nowrap;
+}
+.menu-row-theme{flex-wrap:wrap;}
+.theme-toggle{display:flex;background:var(--panel);border-radius:999px;padding:3px;gap:2px;}
+.theme-toggle button{
+  flex:none;
+  font-size:11.5px;font-weight:700;color:var(--muted);
+  background:none;border:none;
+  padding:6px 12px;border-radius:999px;
+  font-family:inherit;
+}
+.theme-toggle button.active{background:var(--bg);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.1);}
+
+/* ---------- Dark theme override ---------- */
+html.dark-mode{
+  --bg:#15171E;
+  --panel:#20232D;
+  --ink:#F1F2F6;
+  --ink-soft:#C6C9D4;
+  --muted:#8B8FA0;
+  --line:#2C2F3A;
+}
+html.dark-mode .brand-mark{box-shadow:0 0 0 1px rgba(255,255,255,.06);}
+html.dark-mode .icon-btn,
+html.dark-mode .bell-btn{border-color:var(--line);}
+html.dark-mode .chat-intro-bubble,
+html.dark-mode .msg-row.assistant .msg-bubble{background:var(--panel);}
+html.dark-mode .chat-send-btn:disabled{background:#3A3E4C;}
+html.dark-mode .toast{background:#EDEFF4;color:#14161C;}
+
+.searchbar{cursor:pointer;}
+
+/* ---------- Notification overlay ---------- */
+.notif-overlay{
+  position:fixed;
+  top:0;left:50%;bottom:0;
+  width:100%;
+  max-width:430px;
+  background:var(--bg);
+  z-index:200;
+  display:flex;
+  flex-direction:column;
+  transform:translate(-50%, 100%);
+  transition:transform .28s ease;
+}
+.notif-overlay.open{transform:translate(-50%, 0);}
+.notif-overlay.hidden{display:none;}
+.notif-header{
+  flex:none;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px 12px;
+  border-bottom:1px solid var(--line);
+}
+.notif-title{font-size:16px;font-weight:800;letter-spacing:-.01em;}
+.notif-close{
+  background:none;border:none;color:var(--ink);
+  width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+}
+.notif-tabs{
+  flex:none;
+  display:flex;gap:8px;
+  padding:14px 20px;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.notif-tabs::-webkit-scrollbar{display:none;}
+.notif-tab{
+  flex:none;
+  font-size:12.5px;font-weight:700;
+  color:var(--ink-soft);
+  background:var(--panel);
+  border:none;
+  padding:9px 15px;
+  border-radius:999px;
+  font-family:inherit;
+  white-space:nowrap;
+}
+.notif-tab.active{background:var(--accent);color:#fff;}
+
+.notif-list{flex:1;overflow-y:auto;padding-bottom:24px;}
+.notif-item{
+  width:100%;
+  display:flex;align-items:flex-start;gap:12px;
+  padding:14px 20px;
+  border-bottom:1px solid var(--line);
+  background:none;border-left:none;border-right:none;border-top:none;
+  text-align:left;font-family:inherit;
+  position:relative;
+}
+.notif-item.unread{background:var(--accent-soft);}
+.notif-item.filtered-out{display:none;}
+.notif-icon{
+  flex:none;width:30px;height:30px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--panel);color:var(--ink-soft);
+  margin-top:1px;
+}
+.notif-item.unread .notif-icon{background:#fff;color:var(--accent);}
+.notif-body{flex:1;min-width:0;}
+.notif-item-title{font-size:13px;font-weight:700;color:var(--ink);}
+.notif-item-desc{margin-top:3px;font-size:12px;line-height:1.5;color:var(--ink-soft);}
+.notif-item-meta{margin-top:6px;font-size:10.5px;color:var(--muted);font-weight:600;}
+.notif-dot{
+  flex:none;
+  position:absolute;top:16px;right:18px;
+  width:7px;height:7px;border-radius:50%;
+  background:var(--accent);
+}
+.notif-empty{padding:60px 20px;text-align:center;font-size:13px;color:var(--muted);}
+
+/* ---------- Bottom nav ---------- */
+.bottom-nav{
+  position:fixed;
+  left:50%;
+  transform:translateX(-50%);
+  bottom:0;
+  width:100%;
+  max-width:430px;
+  background:rgba(255,255,255,.96);
+  backdrop-filter:blur(10px);
+  border-top:1px solid var(--line);
+  display:flex;
+  justify-content:space-around;
+  padding:10px 12px calc(8px + env(safe-area-inset-bottom));
+}
+.nav-item{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  font-size:10.5px;font-weight:700;color:var(--muted);
+  background:none;border:none;
+}
+.nav-item.active{color:var(--accent);}
+.nav-item svg{width:20px;height:20px;}
+</style>
+</head>
+<body>
+<div class="screen">
+
+  <!-- Chat header (채팅 화면에서만 노출) -->
+  <div class="chat-header" id="chat-header">
+    <button class="chat-back" id="chat-back-btn" aria-label="뒤로가기">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="chat-title">AI 매니저</div>
+    <button class="chat-menu-btn" aria-label="메뉴">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </div>
+
+  <!-- Search bar -->
+  <div class="searchbar-wrap" id="topbar-search">
+    <div class="searchbar-row">
+      <div class="searchbar" id="home-searchbar" role="button" tabindex="0">
+        <span class="plus">+</span>
+        <input type="text" placeholder="무엇이든 물어보세요" readonly />
+      </div>
+      <button class="bell-btn" id="bell-btn" aria-label="알림">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
+        <span class="dot" id="bell-dot"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 오늘 화면 -->
+  <div class="view" id="view-today">
+
+  <!-- Greeting -->
+  <div class="greeting">
+    <svg class="mark" viewBox="0 0 34 34" fill="none">
+      <path d="M17 3 L30 27 H4 Z" fill="#171923"/>
+      <path d="M17 3 L30 27 H17 Z" fill="#E14C6B"/>
+    </svg>
+    <div class="greeting-text">
+      <h1>김한별님, 오늘 할 일 4개</h1>
+      <div class="greeting-sub">7월 17일 금요일 · AI 매니저 아침 브리핑 <span class="plus-inline">+</span></div>
+    </div>
+  </div>
+
+  <div class="brief-box">오늘은 수업 2개와 마감 임박 학사 일정이 있어요. 수강 바구니 마감이 3일 남았으니, 잊기 전에 오늘 담아두면 좋을 것 같아요.</div>
+
+  <!-- Today tasks -->
+  <div class="tasklist">
+    <div class="task-row">
+      <div class="task-time">10:00</div>
+      <div class="task-body">
+        <div class="task-name">실용영어 수업</div>
+        <div class="task-tag">수업</div>
+      </div>
+    </div>
+
+    <div class="task-row">
+      <div class="task-time">13:00</div>
+      <div class="task-body">
+        <div class="task-name">AI 리터러시 실습</div>
+        <div class="task-tag">수업</div>
+      </div>
+    </div>
+
+    <div class="task-row">
+      <div class="task-time">오늘 중</div>
+      <div class="task-body">
+        <div class="task-name">수강 바구니 담기 (마감 D-3)</div>
+        <div class="task-tag">학사</div>
+      </div>
+      <button class="task-action">바구니 담기 ›</button>
+    </div>
+
+    <div class="task-row">
+      <div class="task-time">오늘 중</div>
+      <div class="task-body">
+        <div class="task-name">진로 상담 사전 설문 작성</div>
+        <div class="task-tag">상담</div>
+      </div>
+      <button class="task-action">설문 작성 ›</button>
+    </div>
+  </div>
+
+  <!-- Timetable -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">내 시간표</div>
+      <div class="section-note">2026-2학기</div>
+    </div>
+
+    <div class="tt-card">
+      <div class="tt-header-row">
+        <div class="tt-label-spacer"></div>
+        <div class="tt-day">월</div>
+        <div class="tt-day">화</div>
+        <div class="tt-day">수</div>
+        <div class="tt-day">목</div>
+        <div class="tt-day today">금</div>
+      </div>
+      <div class="tt-body-row">
+        <div class="tt-hours">
+          <div class="tt-hour">9</div>
+          <div class="tt-hour">10</div>
+          <div class="tt-hour">11</div>
+          <div class="tt-hour">12</div>
+          <div class="tt-hour">13</div>
+          <div class="tt-hour">14</div>
+          <div class="tt-hour">15</div>
+          <div class="tt-hour">16</div>
+        </div>
+        <div class="tt-days-grid">
+          <!-- 월 : 9-11 공학수학Ⅱ / 13-15 C프로그래밍 -->
+          <div class="tt-col">
+            <div class="tt-course c-blue" style="top:0%;height:25%;">공학수학Ⅱ<span>본관 302</span></div>
+            <div class="tt-course c-pink" style="top:50%;height:25%;">C프로그래밍<span>공학관 401</span></div>
+          </div>
+          <!-- 화 : 10-12 AI 리터러시 / 15-17 전공탐색세미나 -->
+          <div class="tt-col">
+            <div class="tt-course c-green" style="top:12.5%;height:25%;">AI 리터러시<span>AI관 201</span></div>
+            <div class="tt-course c-yellow" style="top:75%;height:25%;">전공탐색세미나<span>본관 105</span></div>
+          </div>
+          <!-- 수 : 9-11 C프로그래밍 실습 / 13-14:30 인성과 진로설계 -->
+          <div class="tt-col">
+            <div class="tt-course c-purple" style="top:0%;height:25%;">C프로그래밍 실습<span>공학관 402</span></div>
+            <div class="tt-course c-orange" style="top:50%;height:18.75%;">인성과 진로설계<span>본관 201</span></div>
+          </div>
+          <!-- 목 : 10-12 공학수학Ⅱ / 14-16 스마트팩토리 개론 -->
+          <div class="tt-col">
+            <div class="tt-course c-blue" style="top:12.5%;height:25%;">공학수학Ⅱ<span>본관 302</span></div>
+            <div class="tt-course c-teal" style="top:62.5%;height:25%;">스마트팩토리 개론<span>산학관 301</span></div>
+          </div>
+          <!-- 금 : 10-12 실용영어 / 13-15 AI 리터러시 실습 -->
+          <div class="tt-col">
+            <div class="tt-course c-blue" style="top:12.5%;height:25%;">실용영어<span>어학관 305</span></div>
+            <div class="tt-course c-pink" style="top:50%;height:25%;">AI 리터러시 실습<span>AI관 202</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upcoming -->
+  <div class="section" id="upcoming-anchor">
+    <div class="section-head">
+      <div class="section-title">다가오는 일정</div>
+    </div>
+
+    <div>
+      <div class="up-row">
+        <div class="up-date"><b>7/20</b><small>(월)</small></div>
+        <div class="up-body">
+          <div class="up-name">수강 바구니 마감</div>
+          <div class="up-tag">학사</div>
+        </div>
+        <div class="dday">D-3</div>
+      </div>
+
+      <div class="up-row">
+        <div class="up-date"><b>7/21</b><small>14:00</small></div>
+        <div class="up-body">
+          <div class="up-name">진로 상담 — 전공 탐색 리포트 리뷰</div>
+          <div class="up-tag">상담</div>
+        </div>
+      </div>
+
+      <div class="up-row">
+        <div class="up-date"><b>7/24</b><small>(금)</small></div>
+        <div class="up-body">
+          <div class="up-name">AI 역량 진단 (2차)</div>
+          <div class="up-tag">진단</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div>
+  <!-- /오늘 화면 -->
+
+  <!-- 성장 화면 -->
+  <div class="view hidden" id="view-growth">
+
+    <div class="profile-card">
+      <div class="avatar">김</div>
+      <div>
+        <div class="profile-name">김한별</div>
+        <div class="profile-sub">자유전공학과 · 1학년 2학기</div>
+      </div>
+    </div>
+
+    <div class="chip-row">
+      <span class="tag-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+        AI 활용 실무
+      </span>
+      <span class="tag-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+        전공 핵심역량
+      </span>
+      <span class="tag-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+        글로벌 인성리더
+      </span>
+      <span class="tag-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+        성실 출석
+      </span>
+      <span class="tag-chip muted">진행 중 2</span>
+      <span class="tag-chip link">전체 보기 ›</span>
+    </div>
+
+    <div class="progress-section" id="growth-roadmap-anchor">
+      <div class="progress-labels"><span>입학</span><span class="end">취업까지 30%</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:30%;"></div></div>
+    </div>
+
+    <div class="stepper">
+      <div class="step done">
+        <div class="step-dot">✓</div>
+        <div class="step-label">캠퍼스 적응</div>
+        <div class="step-sub">1학년 1학기</div>
+      </div>
+      <div class="step current">
+        <div class="step-dot">2</div>
+        <div class="step-label">전공 탐색</div>
+        <div class="step-sub">1학년 2학기</div>
+      </div>
+      <div class="step">
+        <div class="step-dot">3</div>
+        <div class="step-label">역량 개발</div>
+        <div class="step-sub">2학년</div>
+      </div>
+      <div class="step">
+        <div class="step-dot">4</div>
+        <div class="step-label">취업 준비</div>
+        <div class="step-sub">3학년 1학기</div>
+      </div>
+      <div class="step">
+        <div class="step-dot">5</div>
+        <div class="step-label">취업·현장연계</div>
+        <div class="step-sub">3학년 2학기</div>
+      </div>
+    </div>
+
+    <div class="section" id="growth-competency-anchor">
+      <div class="section-head">
+        <div class="section-title">역량 인증 현황</div>
+        <span class="level-badge">통합인증 Lv.2</span>
+      </div>
+
+      <div class="competency-card">
+        <div class="comp-row">
+          <div class="comp-label">핵심역량</div>
+          <div class="comp-bar"><div class="comp-fill" style="width:62%;"></div></div>
+          <div class="comp-value">62</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-label">교양역량</div>
+          <div class="comp-bar"><div class="comp-fill" style="width:55%;"></div></div>
+          <div class="comp-value">55</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-label">전공역량</div>
+          <div class="comp-bar"><div class="comp-fill" style="width:48%;"></div></div>
+          <div class="comp-value">48</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-label">AI역량</div>
+          <div class="comp-bar"><div class="comp-fill" style="width:70%;"></div></div>
+          <div class="comp-value">70</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-label">인성역량</div>
+          <div class="comp-bar"><div class="comp-fill" style="width:81%;"></div></div>
+          <div class="comp-value">81</div>
+        </div>
+        <div class="comp-note">핵심·교양·전공·AI·인성 5개 역량을 통합 관리하는 연암 인증 체계 기준. 다음 레벨까지 37% 남았어요.</div>
+      </div>
+
+      <button class="evidence-btn">역량 근거 활동 기록 보기 <span>›</span></button>
+    </div>
+
+  </div>
+  <!-- /성장 화면 -->
+
+  <!-- 채팅 화면 -->
+  <div class="view hidden" id="view-chat">
+
+    <div class="chat-intro-row">
+      <svg class="chat-avatar" viewBox="0 0 34 34" fill="none">
+        <path d="M17 3 L30 27 H4 Z" fill="#171923"/>
+        <path d="M17 3 L30 27 H17 Z" fill="#E14C6B"/>
+      </svg>
+      <div class="chat-intro-bubble">안녕하세요 한별님! 전주기 성공 매니저예요. 학업·진로·취업까지 무엇이든 편하게 물어보세요.</div>
+    </div>
+
+    <div class="suggest-row" id="suggest-row">
+      <button class="suggest-chip">내 전공 적합도 보여줘</button>
+      <button class="suggest-chip">이번 학기 뭘 들을까?</button>
+      <button class="suggest-chip">취업까지 로드맵 알려줘</button>
+      <button class="suggest-chip">장학금 받을 조건은?</button>
+    </div>
+
+    <div id="chat-messages"></div>
+
+  </div>
+  <!-- /채팅 화면 -->
+
+  <!-- 포폴 화면 -->
+  <div class="view hidden" id="view-portfolio">
+
+    <div class="section" style="margin-top:22px;">
+      <div class="section-title">자기소개서</div>
+      <div class="port-sub">내 활동 데이터를 근거로 직무별 초안을 만들고, 수정과 피드백까지 한곳에서 관리해요.</div>
+      <button class="ai-draft-btn" id="ai-draft-btn">AI 초안 만들기</button>
+    </div>
+
+    <div class="section" id="portfolio-records-anchor">
+      <div class="section-head">
+        <div class="port-note-title">AI가 초안을 쓸 때 사용하는 내 활동 기록이에요.</div>
+        <button class="section-link-btn" id="view-all-records-btn">전체 보기</button>
+      </div>
+
+      <div class="stat-grid">
+        <button class="stat-card" data-label="교과" data-count="5"><b>5</b><span>교과</span></button>
+        <button class="stat-card" data-label="프로젝트" data-count="3"><b>3</b><span>프로젝트</span></button>
+        <button class="stat-card" data-label="자격증" data-count="1"><b>1</b><span>자격증</span></button>
+        <button class="stat-card" data-label="수상" data-count="1"><b>1</b><span>수상</span></button>
+        <button class="stat-card" data-label="역량진단" data-count="2"><b>2</b><span>역량진단</span></button>
+        <button class="stat-card" data-label="비교과" data-count="3"><b>3</b><span>비교과</span></button>
+      </div>
+
+      <div class="principle-box">
+        <b>허위 경험 방지 원칙</b>
+        <p>기록으로 검증된 활동만 근거로 사용하고, AI는 없는 경험을 지어내지 않아요. 모든 문장에는 근거 활동이 함께 표시돼요.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div class="section-title">내 자기소개서</div></div>
+      <div id="essay-list">
+        <button class="essay-row" data-title="스마트팩토리 설비 엔지니어" data-meta="v3 · 2시간 전 수정 · 피드백 1">
+          <div class="essay-main">
+            <div class="essay-title">스마트팩토리 설비 엔지니어</div>
+            <div class="essay-meta">v3 · 2시간 전 수정 · 피드백 1</div>
+          </div>
+          <span class="essay-badge feedback">피드백 도착</span>
+        </button>
+        <button class="essay-row" data-title="AI 서비스 기획" data-meta="v1 · 어제 수정">
+          <div class="essay-main">
+            <div class="essay-title">AI 서비스 기획</div>
+            <div class="essay-meta">v1 · 어제 수정</div>
+          </div>
+          <span class="essay-badge draft">초안</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+  <!-- /포폴 화면 -->
+
+  <!-- 전체 메뉴 화면 -->
+  <div class="view hidden" id="view-all">
+
+    <div class="allmenu-profile">
+      <div class="avatar">김</div>
+      <div>
+        <div class="profile-name">안녕하세요, 김한별님</div>
+        <div class="profile-sub">자유전공학과 · 1학년 2학기</div>
+      </div>
+    </div>
+
+    <div class="menu-section">
+      <div class="menu-section-label">학사</div>
+      <div class="menu-card">
+        <button class="menu-row" data-action="toast:아직 준비 중인 기능이에요. 조금만 기다려주세요!">
+          <span class="menu-row-label">수강 계획</span>
+          <span class="badge-soon">준비 중</span>
+        </button>
+        <button class="menu-row" data-action="toast:아직 준비 중인 기능이에요. 조금만 기다려주세요!">
+          <span class="menu-row-label">출결 현황</span>
+          <span class="badge-soon">준비 중</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="menu-section">
+      <div class="menu-section-label">성장·인증</div>
+      <div class="menu-card">
+        <button class="menu-row" data-action="nav:view-growth:growth-roadmap-anchor">
+          <span class="menu-row-label">전주기 로드맵</span>
+          <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+        <button class="menu-row" data-action="nav:view-growth:growth-competency-anchor">
+          <span class="menu-row-label">역량 인증</span>
+          <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+        <button class="menu-row" data-action="nav:view-portfolio:portfolio-records-anchor">
+          <span class="menu-row-label">활동 기록</span>
+          <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+        <button class="menu-row" data-action="toast:오픈배지 포트폴리오는 다음 업데이트에서 만나요!">
+          <span class="menu-row-label">오픈배지 포트폴리오</span>
+          <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="menu-section">
+      <div class="menu-section-label">진로·취업</div>
+      <div class="menu-card">
+        <button class="menu-row" data-action="nav:view-portfolio:">
+          <span class="menu-row-label highlight-link">자기소개서 (e-Portfolio)</span>
+          <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+        <button class="menu-row" data-action="toast:아직 준비 중인 기능이에요. 조금만 기다려주세요!">
+          <span class="menu-row-label">채용 연계</span>
+          <span class="badge-soon">준비 중</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="menu-section">
+      <div class="menu-section-label">프로그램·혜택</div>
+      <div class="menu-card">
+        <button class="menu-row" data-action="toast:아직 준비 중인 기능이에요. 조금만 기다려주세요!">
+          <span class="menu-row-label">비교과 프로그램</span>
+          <span class="badge-soon">준비 중</span>
+        </button>
+        <button class="menu-row" data-action="toast:아직 준비 중인 기능이에요. 조금만 기다려주세요!">
+          <span class="menu-row-label">마일리지·장학금</span>
+          <span class="badge-soon">준비 중</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="menu-section">
+      <div class="menu-section-label">상담</div>
+      <div class="menu-card">
+        <button class="menu-row" data-action="nav:view-chat:">
+          <span class="menu-row-label">AI 매니저 상담</span>
+          <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+        <button class="menu-row" data-action="toast:새로운 알림이 없어요.">
+          <span class="menu-row-label">알림</span>
+          <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="menu-section">
+      <div class="menu-section-label">설정·계정</div>
+      <div class="menu-card">
+        <div class="menu-row menu-row-theme">
+          <span class="menu-row-label">화면 테마</span>
+          <div class="theme-toggle" id="theme-toggle">
+            <button class="active" data-theme="light">라이트</button>
+            <button data-theme="system">시스템</button>
+            <button data-theme="dark">다크</button>
+          </div>
+        </div>
+        <button class="menu-row" data-action="toast:아직 준비 중인 기능이에요. 조금만 기다려주세요!">
+          <span class="menu-row-label">알림 설정</span>
+          <span class="badge-soon">준비 중</span>
+        </button>
+        <button class="menu-row" data-action="toast:아직 준비 중인 기능이에요. 조금만 기다려주세요!">
+          <span class="menu-row-label">언어 설정</span>
+          <span class="badge-soon">준비 중</span>
+        </button>
+        <button class="menu-row" data-action="toast:아직 준비 중인 기능이에요. 조금만 기다려주세요!">
+          <span class="menu-row-label">개인정보 수정</span>
+          <span class="badge-soon">준비 중</span>
+        </button>
+        <button class="menu-row" data-action="toast:아직 준비 중인 기능이에요. 조금만 기다려주세요!">
+          <span class="menu-row-label">로그아웃</span>
+          <span class="badge-soon">준비 중</span>
+        </button>
+      </div>
+    </div>
+
+    <div style="height:16px;"></div>
+  </div>
+  <!-- /전체 메뉴 화면 -->
+
+  <!-- Bottom nav -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-view="view-today">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+      오늘
+    </button>
+    <button class="nav-item" data-view="view-growth">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
+      성장
+    </button>
+    <button class="nav-item" data-view="view-chat">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      채팅
+    </button>
+    <button class="nav-item" data-view="view-portfolio">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+      포폴
+    </button>
+    <button class="nav-item" data-view="view-all">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>
+      전체
+    </button>
+  </nav>
+
+  <!-- Chat input bar (채팅 화면에서만 노출) -->
+  <div class="chat-input-bar" id="chat-input-bar">
+    <input type="text" id="chat-input" placeholder="무엇이든 물어보세요" autocomplete="off" />
+    <button class="chat-send-btn" id="chat-send-btn" aria-label="전송">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+    </button>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Notification overlay -->
+  <div class="notif-overlay hidden" id="notif-overlay">
+    <div class="notif-header">
+      <div class="notif-title">알림</div>
+      <button class="notif-close" id="notif-close-btn" aria-label="닫기">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+
+    <div class="notif-tabs" id="notif-tabs">
+      <button class="notif-tab active" data-filter="all">전체</button>
+      <button class="notif-tab" data-filter="ai">AI 매니저</button>
+      <button class="notif-tab" data-filter="schedule">일정</button>
+      <button class="notif-tab" data-filter="system">시스템</button>
+    </div>
+
+    <div class="notif-list" id="notif-list">
+      <button class="notif-item unread" data-type="ai"
+        data-message="한별님, 전공 탐색 리포트로 트랙 적합도를 새로 계산해 봤어요. SW·AI 서비스 트랙이 가장 잘 맞는 편이에요. 어떤지 한번 보고, 괜찮으면 계획에 담아둬도 좋아요.">
+        <div class="notif-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.8 5.2L19 9l-5.2 1.8L12 16l-1.8-5.2L5 9l5.2-1.8z"/></svg>
+        </div>
+        <div class="notif-body">
+          <div class="notif-item-title">AI 매니저가 새로운 메시지를 보냈어요</div>
+          <div class="notif-item-desc">한별님, 전공 탐색 리포트로 트랙 적합도를 새로 계산해 봤어요. SW·AI 서비스 트랙이 가장 잘 맞는 편이에요. 어떤지 한번 보고, 괜찮으면 계획에 담아둬도 좋아요.</div>
+          <div class="notif-item-meta">AI 매니저 · 방금 전</div>
+        </div>
+        <span class="notif-dot"></span>
+      </button>
+
+      <button class="notif-item unread" data-type="schedule" data-anchor="upcoming-anchor">
+        <div class="notif-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        </div>
+        <div class="notif-body">
+          <div class="notif-item-title">수강 바구니 마감 D-3</div>
+          <div class="notif-item-desc">7/20(월) 23:59까지 담아야 해요.</div>
+          <div class="notif-item-meta">일정 · 1시간 전</div>
+        </div>
+        <span class="notif-dot"></span>
+      </button>
+
+      <button class="notif-item" data-type="ai"
+        data-message="지난주 진로 흥미검사 결과 리포트가 나왔어요. 결과를 반영해서 전공 탐색 로드맵을 업데이트해 뒀어요. 편할 때 어떤 부분부터 같이 볼지 알려주세요.">
+        <div class="notif-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.8 5.2L19 9l-5.2 1.8L12 16l-1.8-5.2L5 9l5.2-1.8z"/></svg>
+        </div>
+        <div class="notif-body">
+          <div class="notif-item-title">AI 매니저가 새로운 메시지를 보냈어요</div>
+          <div class="notif-item-desc">지난주 진로 흥미검사 결과 리포트가 나왔어요. 결과를 반영해서 전공 탐색 로드맵을 업데이트해 뒀어요. 편할 때 어떤 부분부터 같이 볼지 알려주세요.</div>
+          <div class="notif-item-meta">AI 매니저 · 3시간 전</div>
+        </div>
+      </button>
+
+      <button class="notif-item" data-type="system" data-toast="2026-2학기 AI 역량 배지 요건이 일부 변경됐어요. 자세한 내용은 오픈배지 포트폴리오에서 확인하세요.">
+        <div class="notif-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
+        </div>
+        <div class="notif-body">
+          <div class="notif-item-title">오픈배지 인증 기준 업데이트</div>
+          <div class="notif-item-desc">2026-2학기 AI 역량 배지 요건이 일부 변경됐어요.</div>
+          <div class="notif-item-meta">시스템 · 어제</div>
+        </div>
+      </button>
+
+      <button class="notif-item" data-type="schedule" data-anchor="upcoming-anchor">
+        <div class="notif-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        </div>
+        <div class="notif-body">
+          <div class="notif-item-title">내일 진로 상담 예약</div>
+          <div class="notif-item-desc">7/21(화) 14:00, 전공 탐색 리포트 리뷰.</div>
+          <div class="notif-item-meta">일정 · 어제</div>
+        </div>
+      </button>
+
+      <button class="notif-item" data-type="system" data-toast="지난주 비교과 프로그램 출결이 반영됐어요.">
+        <div class="notif-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
+        </div>
+        <div class="notif-body">
+          <div class="notif-item-title">출결 데이터 동기화 완료</div>
+          <div class="notif-item-desc">지난주 비교과 프로그램 출결이 반영됐어요.</div>
+          <div class="notif-item-meta">시스템 · 2일 전</div>
+        </div>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  /* ---------- 화면 전환 ---------- */
+  const navItems = document.querySelectorAll('.nav-item');
+  const topbarSearch = document.getElementById('topbar-search');
+  const chatHeader = document.getElementById('chat-header');
+  const bottomNav = document.querySelector('.bottom-nav');
+  const chatInputBar = document.getElementById('chat-input-bar');
+
+  function switchView(target){
+    document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+    document.getElementById(target).classList.remove('hidden');
+
+    if(target === 'view-chat'){
+      topbarSearch.style.display = 'none';
+      chatHeader.classList.add('show');
+      chatInputBar.classList.add('show');
+      document.getElementById('chat-input').focus();
+    } else {
+      topbarSearch.style.display = '';
+      chatHeader.classList.remove('show');
+      chatInputBar.classList.remove('show');
+    }
+    navItems.forEach(b => b.classList.remove('active'));
+    const matchingNav = document.querySelector('.nav-item[data-view="'+target+'"]');
+    if(matchingNav) matchingNav.classList.add('active');
+    window.scrollTo({top:0, behavior:'instant'});
+  }
+
+  navItems.forEach(btn => {
+    btn.addEventListener('click', () => switchView(btn.getAttribute('data-view')));
+  });
+
+  document.getElementById('chat-back-btn').addEventListener('click', () => switchView('view-today'));
+
+  /* ---------- 채팅 상호작용 ---------- */
+  const chatMessages = document.getElementById('chat-messages');
+  const chatInput = document.getElementById('chat-input');
+  const chatSendBtn = document.getElementById('chat-send-btn');
+
+  const avatarSvg = '<svg class="msg-avatar" viewBox="0 0 34 34" fill="none"><path d="M17 3 L30 27 H4 Z" fill="#171923"/><path d="M17 3 L30 27 H17 Z" fill="#E14C6B"/></svg>';
+
+  function scrollChatToBottom(){
+    window.scrollTo({top: document.body.scrollHeight, behavior:'smooth'});
+  }
+
+  function addMessage(text, role){
+    const row = document.createElement('div');
+    row.className = 'msg-row ' + role;
+    if(role === 'assistant'){
+      row.innerHTML = avatarSvg + '<div class="msg-bubble"></div>';
+      row.querySelector('.msg-bubble').textContent = text;
+    } else {
+      row.innerHTML = '<div class="msg-bubble"></div>';
+      row.querySelector('.msg-bubble').textContent = text;
+    }
+    chatMessages.appendChild(row);
+    scrollChatToBottom();
+  }
+
+  function showTyping(){
+    const row = document.createElement('div');
+    row.className = 'msg-row assistant';
+    row.id = 'typing-row';
+    row.innerHTML = avatarSvg + '<div class="msg-bubble typing-bubble"><span></span><span></span><span></span></div>';
+    chatMessages.appendChild(row);
+    scrollChatToBottom();
+  }
+
+  function hideTyping(){
+    const row = document.getElementById('typing-row');
+    if(row) row.remove();
+  }
+
+  function getReply(text){
+    const t = text.trim();
+    if(t.includes('전공') && t.includes('적합')){
+      return '자유전공학과 탐색 데이터를 보면 한별님은 AI·리터러시 계열 성취도가 높아요. 전공탐색세미나 리포트를 기준으로 3개 트랙(AI융합, 산업디자인, 경영정보) 적합도를 다음 주 초 상담에서 함께 확인해볼까요?';
+    }
+    if(t.includes('학기') && (t.includes('뭘') || t.includes('과목') || t.includes('수강'))){
+      return '2학기 남은 학점과 전공 탐색 방향을 고려하면 「AI 리터러시 심화」와 「데이터분석 기초」를 추천해요. 수강 바구니 마감이 D-3이니 오늘 중으로 담아두시는 게 좋아요.';
+    }
+    if(t.includes('로드맵') || (t.includes('취업') && !t.includes('조건'))){
+      return '지금은 2단계 「전공 탐색」에 계세요. 다음 단계인 「역량 개발」(2학년)까지는 핵심역량 인증을 70점 이상으로 올리는 게 관문이에요. 역량 근거 활동을 3건 더 등록하면 도달할 수 있어요.';
+    }
+    if(t.includes('장학금')){
+      return '성실 출석 태그와 역량 통합인증 Lv.2 이상을 유지하면 교내 성장장학금 대상이에요. 현재 Lv.2, 다음 레벨까지 37% 남았으니 이번 학기 안에 도전해볼 만해요.';
+    }
+    if(t.includes('시간표') || t.includes('수업')){
+      return '이번 주는 수업이 총 6개예요. 오늘은 10시 실용영어, 13시 AI 리터러시 실습이 있어요. 시간표 탭에서 요일별로 확인하실 수 있어요.';
+    }
+    if(t.includes('안녕') || t.includes('하이') || t.includes('반가워')){
+      return '안녕하세요, 한별님! 오늘도 화이팅이에요 :) 학업이든 진로든 편하게 물어보세요.';
+    }
+    const fallbacks = [
+      '네, 확인해볼게요. 조금 더 구체적으로 말씀해주시면 정확히 안내드릴 수 있어요.',
+      '좋은 질문이에요. 관련해서 학사팀 확인이 필요한 부분은 상담 탭으로 바로 연결해드릴게요.',
+      '한별님의 최근 활동 기록을 참고해서 다시 정리해드릴게요. 잠시만요.'
+    ];
+    return fallbacks[Math.floor(Math.random() * fallbacks.length)];
+  }
+
+  function sendMessage(text){
+    if(!text || !text.trim()) return;
+    addMessage(text, 'user');
+    chatInput.value = '';
+    showTyping();
+    const delay = 650 + Math.random() * 500;
+    setTimeout(() => {
+      hideTyping();
+      addMessage(getReply(text), 'assistant');
+    }, delay);
+  }
+
+  chatSendBtn.addEventListener('click', () => sendMessage(chatInput.value));
+  chatInput.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter'){ sendMessage(chatInput.value); }
+  });
+
+  document.getElementById('suggest-row').addEventListener('click', (e) => {
+    const chip = e.target.closest('.suggest-chip');
+    if(chip) sendMessage(chip.textContent);
+  });
+
+  /* ---------- 토스트 ---------- */
+  const toastEl = document.getElementById('toast');
+  let toastTimer = null;
+  function showToast(msg, duration = 1800){
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    if(toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), duration);
+  }
+
+  /* ---------- 포폴 화면 ---------- */
+  const aiDraftBtn = document.getElementById('ai-draft-btn');
+  const essayList = document.getElementById('essay-list');
+  let draftCount = 0;
+
+  aiDraftBtn.addEventListener('click', () => {
+    aiDraftBtn.disabled = true;
+    aiDraftBtn.textContent = 'AI가 초안을 작성하는 중…';
+    showToast('내 활동 기록 15건을 근거로 초안을 작성하고 있어요.');
+
+    setTimeout(() => {
+      draftCount += 1;
+      const row = document.createElement('button');
+      row.className = 'essay-row';
+      row.innerHTML =
+        '<div class="essay-main">' +
+          '<div class="essay-title">새 직무 초안 ' + draftCount + '</div>' +
+          '<div class="essay-meta">v1 · 방금 생성</div>' +
+        '</div>' +
+        '<span class="essay-badge draft">초안</span>';
+      row.addEventListener('click', () => showToast('"새 직무 초안 ' + draftCount + '" 편집 화면으로 이동합니다. (데모)'));
+      essayList.insertBefore(row, essayList.firstChild);
+
+      aiDraftBtn.disabled = false;
+      aiDraftBtn.textContent = 'AI 초안 만들기';
+      showToast('새 초안이 생성됐어요! 목록 맨 위에서 확인해보세요.');
+    }, 1300);
+  });
+
+  document.getElementById('view-all-records-btn').addEventListener('click', () => {
+    showToast('교과·프로젝트·자격증·수상·역량진단·비교과 전체 활동 기록 15건을 불러왔어요.');
+  });
+
+  document.querySelectorAll('.stat-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const label = card.getAttribute('data-label');
+      const count = card.getAttribute('data-count');
+      showToast('"' + label + '" 활동 ' + count + '건이 초안 근거로 연결돼 있어요.');
+    });
+  });
+
+  document.querySelectorAll('#essay-list .essay-row').forEach(row => {
+    row.addEventListener('click', () => {
+      const title = row.getAttribute('data-title');
+      showToast('"' + title + '" 자기소개서를 불러옵니다. (데모)');
+    });
+  });
+
+  /* ---------- 전체 메뉴 ---------- */
+  function handleMenuAction(action){
+    if(!action) return;
+    if(action.startsWith('nav:')){
+      const parts = action.split(':');
+      const target = parts[1];
+      const anchor = parts[2];
+      switchView(target);
+      if(anchor){
+        setTimeout(() => {
+          const el = document.getElementById(anchor);
+          if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+        }, 80);
+      }
+    } else if(action.startsWith('toast:')){
+      showToast(action.slice(6));
+    }
+  }
+
+  document.querySelectorAll('#view-all .menu-row[data-action]').forEach(row => {
+    row.addEventListener('click', () => handleMenuAction(row.getAttribute('data-action')));
+  });
+
+  /* ---------- 화면 테마 ---------- */
+  function applyTheme(mode){
+    let dark;
+    if(mode === 'dark') dark = true;
+    else if(mode === 'light') dark = false;
+    else dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    document.documentElement.classList.toggle('dark-mode', dark);
+
+    const msg = mode === 'light' ? '라이트 모드로 변경했어요.'
+      : mode === 'dark' ? '다크 모드로 변경했어요.'
+      : '기기 설정을 따르는 모드로 변경했어요.';
+    showToast(msg);
+  }
+
+  document.querySelectorAll('#theme-toggle button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#theme-toggle button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      applyTheme(btn.getAttribute('data-theme'));
+    });
+  });
+
+  /* ---------- 검색바 → 채팅 이동 ---------- */
+  const homeSearchbar = document.getElementById('home-searchbar');
+  homeSearchbar.addEventListener('click', () => switchView('view-chat'));
+  homeSearchbar.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); switchView('view-chat'); }
+  });
+
+  /* ---------- 알림 오버레이 ---------- */
+  const notifOverlay = document.getElementById('notif-overlay');
+  const bellDot = document.getElementById('bell-dot');
+  const notifItems = Array.from(document.querySelectorAll('.notif-item'));
+
+  function refreshBellDot(){
+    const anyUnread = notifItems.some(i => i.classList.contains('unread'));
+    bellDot.style.display = anyUnread ? '' : 'none';
+  }
+
+  function openNotifOverlay(){
+    notifOverlay.classList.remove('hidden');
+    requestAnimationFrame(() => notifOverlay.classList.add('open'));
+  }
+  function closeNotifOverlay(){
+    notifOverlay.classList.remove('open');
+    setTimeout(() => notifOverlay.classList.add('hidden'), 280);
+  }
+
+  document.getElementById('bell-btn').addEventListener('click', openNotifOverlay);
+  document.getElementById('notif-close-btn').addEventListener('click', closeNotifOverlay);
+
+  document.getElementById('notif-tabs').addEventListener('click', (e) => {
+    const tab = e.target.closest('.notif-tab');
+    if(!tab) return;
+    document.querySelectorAll('.notif-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const filter = tab.getAttribute('data-filter');
+    notifItems.forEach(item => {
+      const match = filter === 'all' || item.getAttribute('data-type') === filter;
+      item.classList.toggle('filtered-out', !match);
+    });
+  });
+
+  notifItems.forEach(item => {
+    item.addEventListener('click', () => {
+      item.classList.remove('unread');
+      refreshBellDot();
+
+      const type = item.getAttribute('data-type');
+      if(type === 'ai'){
+        const message = item.getAttribute('data-message');
+        closeNotifOverlay();
+        switchView('view-chat');
+        setTimeout(() => addMessage(message, 'assistant'), 320);
+      } else if(type === 'schedule'){
+        const anchor = item.getAttribute('data-anchor');
+        closeNotifOverlay();
+        switchView('view-today');
+        if(anchor){
+          setTimeout(() => {
+            const el = document.getElementById(anchor);
+            if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+          }, 320);
+        }
+      } else if(type === 'system'){
+        showToast(item.getAttribute('data-toast') || '확인했어요.');
+      }
+    });
+  });
+
+  refreshBellDot();
+</script>
+</body>
+</html>
